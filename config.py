@@ -94,3 +94,44 @@ class NISPConfig(object):
 
     # noise dataset for augmentation
     noise_dataset_path = '/datasets/wham_noise/tr'
+
+class ClearMLNISPConfig(object):
+    
+    # clearml dataset IDs
+    data_id = ''
+    dataset_project = 'datasets/NISP'
+
+    # augmentation
+    wav_augmentation = 'Random Crop, Additive Noise'
+    label_scale = 'Standardization'
+
+    noise_dataset_project = 'datasets/wham_noise'
+
+    # length of wav files for training and testing
+    wav_len = 16000 * 5
+
+    batch_size = 128
+    epochs = 100
+
+    # optimizer
+    optimizer = 'Adam'
+    lr = 1e-3
+    lr_scheduler = '-'
+
+    # loss = alpha * height_loss + beta * age_loss + gamma * gender_loss
+    alpha = 1
+    beta = 1
+    gamma = 1
+
+    # model architecture
+    architecture = 'wav2vec + soft-attention'
+
+    # hidden dimension of LSTM and Dense Layers
+    hidden_size = 128
+
+    # No of GPUs for training and no of workers for datalaoders
+    gpu = 1
+    n_workers = 4
+
+    # model checkpoint to continue from
+    model_checkpoint = None
