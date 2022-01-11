@@ -17,26 +17,6 @@ if __name__ == "__main__":
 
     print(f'Training Model on NISP Dataset\n#Cores = {cfg.n_workers}\t#GPU = {cfg.gpu}')
 
-    # hyperparameters and details about the model 
-    HPARAMS = {
-        'data_path' : cfg.data_path,
-        'speaker_csv_path' : cfg.speaker_csv_path,
-        'data_wav_len' : cfg.wav_len,
-        'data_batch_size' : cfg.batch_size,
-        'data_wav_augmentation' : cfg.wav_augmentation,
-        'data_label_scale' : cfg.label_scale,
-
-        'training_optimizer' : cfg.optimizer,
-        'training_lr' : cfg.lr,
-        'training_lr_scheduler' : cfg.lr_scheduler,
-
-        'model_hidden_size' : cfg.hidden_size,
-        'model_alpha' : cfg.alpha,
-        'model_beta' : cfg.beta,
-        'model_gamma' : cfg.gamma,
-        'model_architecture' : cfg.architecture,
-    }
-
     # Training, Validation and Testing Dataset
     ## Training Dataset
     train_set = NISPDataset(

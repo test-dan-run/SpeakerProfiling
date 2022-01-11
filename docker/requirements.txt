@@ -7,3 +7,4 @@ clearml==1.1.5
 pandas
 scikit-learn
 librosa
+boto3
