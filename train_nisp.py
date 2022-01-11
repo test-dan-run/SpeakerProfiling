@@ -1,5 +1,3 @@
-from argparse import ArgumentParser
-from multiprocessing import Pool
 import os
 
 from NISP.dataset import NISPDataset
@@ -11,112 +9,95 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import TensorBoardLogger
 
 from config import NISPConfig
-import torch
 import torch.utils.data as data
 
 if __name__ == "__main__":
 
-    parser = ArgumentParser(add_help=True)
-    parser.add_argument('--data_path', type=str, default=NISPConfig.data_path)
-    parser.add_argument('--speaker_csv_path', type=str, default=NISPConfig.speaker_csv_path)
-    parser.add_argument('--timit_wav_len', type=int, default=NISPConfig.timit_wav_len)
-    parser.add_argument('--batch_size', type=int, default=NISPConfig.batch_size)
-    parser.add_argument('--epochs', type=int, default=NISPConfig.epochs)
-    parser.add_argument('--alpha', type=float, default=NISPConfig.alpha)
-    parser.add_argument('--beta', type=float, default=NISPConfig.beta)
-    parser.add_argument('--gamma', type=float, default=NISPConfig.gamma)
-    parser.add_argument('--hidden_size', type=float, default=NISPConfig.hidden_size)
-    parser.add_argument('--gpu', type=int, default=NISPConfig.gpu)
-    parser.add_argument('--n_workers', type=int, default=NISPConfig.n_workers)
-    parser.add_argument('--dev', type=str, default=False)
-    parser.add_argument('--model_checkpoint', type=str, default=NISPConfig.model_checkpoint)
-    parser.add_argument('--noise_dataset_path', type=str, default=NISPConfig.noise_dataset_path)
+    cfg = NISPConfig()
 
-    parser = pl.Trainer.add_argparse_args(parser)
-    hparams = parser.parse_args()
-    print(f'Training Model on NISP Dataset\n#Cores = {hparams.n_workers}\t#GPU = {hparams.gpu}')
+    print(f'Training Model on NISP Dataset\n#Cores = {cfg.n_workers}\t#GPU = {cfg.gpu}')
 
     # hyperparameters and details about the model 
     HPARAMS = {
-        'data_path' : hparams.data_path,
-        'speaker_csv_path' : hparams.speaker_csv_path,
-        'data_wav_len' : hparams.timit_wav_len,
-        'data_batch_size' : hparams.batch_size,
-        'data_wav_augmentation' : 'Random Crop, Additive Noise',
-        'data_label_scale' : 'Standardization',
+        'data_path' : cfg.data_path,
+        'speaker_csv_path' : cfg.speaker_csv_path,
+        'data_wav_len' : cfg.wav_len,
+        'data_batch_size' : cfg.batch_size,
+        'data_wav_augmentation' : cfg.wav_augmentation,
+        'data_label_scale' : cfg.label_scale,
 
-        'training_optimizer' : 'Adam',
-        'training_lr' : NISPConfig.lr,
-        'training_lr_scheduler' : '-',
+        'training_optimizer' : cfg.optimizer,
+        'training_lr' : cfg.lr,
+        'training_lr_scheduler' : cfg.lr_scheduler,
 
-        'model_hidden_size' : hparams.hidden_size,
-        'model_alpha' : hparams.alpha,
-        'model_beta' : hparams.beta,
-        'model_gamma' : hparams.gamma,
-        'model_architecture' : 'wav2vec + soft-attention',
+        'model_hidden_size' : cfg.hidden_size,
+        'model_alpha' : cfg.alpha,
+        'model_beta' : cfg.beta,
+        'model_gamma' : cfg.gamma,
+        'model_architecture' : cfg.architecture,
     }
 
     # Training, Validation and Testing Dataset
     ## Training Dataset
     train_set = NISPDataset(
-        wav_folder = os.path.join(HPARAMS['data_path'], 'TRAIN'),
-        csv_file = HPARAMS['speaker_csv_path'],
-        wav_len = HPARAMS['data_wav_len'],
-        noise_dataset_path = hparams.noise_dataset_path
+        wav_folder = os.path.join(cfg.data_path, 'TRAIN'),
+        csv_file = cfg.speaker_csv_path,
+        wav_len = cfg.speaker_csv_path,
+        noise_dataset_path = cfg.noise_dataset_path
     )
     ## Training DataLoader
     trainloader = data.DataLoader(
         train_set, 
-        batch_size=HPARAMS['data_batch_size'], 
+        batch_size=cfg.batch_size, 
         shuffle=True, 
-        num_workers=hparams.n_workers
+        num_workers=cfg.n_workers
     )
+
     ## Validation Dataset
     valid_set = NISPDataset(
-        wav_folder = os.path.join(HPARAMS['data_path'], 'VAL'),
-        csv_file = HPARAMS['speaker_csv_path'],
-        wav_len = HPARAMS['data_wav_len'],
+        wav_folder = os.path.join(cfg.data_path, 'VAL'),
+        csv_file = cfg.speaker_csv_path,
+        wav_len = cfg.wav_len,
         is_train=False
     )
     ## Validation Dataloader
     valloader = data.DataLoader(
         valid_set, 
-        batch_size=HPARAMS['data_batch_size'], 
+        batch_size=cfg.batch_size, 
         shuffle=False, 
-        num_workers=hparams.n_workers
+        num_workers=cfg.n_workers
     )
+
     ## Testing Dataset
     test_set = NISPDataset(
-        wav_folder = os.path.join(HPARAMS['data_path'], 'TEST'),
-        csv_file = HPARAMS['speaker_csv_path'],
-        wav_len = HPARAMS['data_wav_len'],
-        is_train=False
+        wav_folder = os.path.join(cfg.data_path, 'TEST'),
+        csv_file = cfg.speaker_csv_path,
+        wav_len = cfg.speaker_csv_path,
+        noise_dataset_path = cfg.noise_dataset_path
     )
-    ## Testing Dataloader
+    ## Testing DataLoader
     testloader = data.DataLoader(
         test_set, 
-        batch_size=HPARAMS['data_batch_size'], 
-        shuffle=False, 
-        num_workers=hparams.n_workers
+        batch_size=cfg.batch_size, 
+        shuffle=True, 
+        num_workers=cfg.n_workers
     )
 
     print('Dataset Split (Train, Validation, Test)=', len(train_set), len(valid_set), len(test_set))
 
-
     #Training the Model
     logger = TensorBoardLogger('NISP_logs', name='')
-    logger.log_hyperparams(HPARAMS)
 
-    model = LightningModel(HPARAMS)
+    model = LightningModel(cfg.hidden_size, cfg.alpha, cfg.beta, cfg.gamma, cfg.lr, cfg.speaker_csv_path)
 
     checkpoint_callback = ModelCheckpoint(
         monitor='v_loss', 
         mode='min',
         verbose=1)
 
-    trainer = pl.Trainer(fast_dev_run=hparams.dev, 
-                        gpus=hparams.gpu, 
-                        max_epochs=hparams.epochs, 
+    trainer = pl.Trainer(fast_dev_run=False, 
+                        gpus=cfg.gpu, 
+                        max_epochs=cfg.epochs, 
                         checkpoint_callback=checkpoint_callback,
                         callbacks=[
                             EarlyStopping(
@@ -128,8 +109,8 @@ if __name__ == "__main__":
                                 )
                         ],
                         logger=logger,
-                        resume_from_checkpoint=hparams.model_checkpoint
-                        distributed_backend='ddp'
+                        resume_from_checkpoint=cfg.model_checkpoint,
+                        accelerator='ddp'
                         )
 
     trainer.fit(model, train_dataloader=trainloader, val_dataloaders=valloader)

@@ -1,24 +1,22 @@
 import os
 import shutil
-import tarfile
 import subprocess
-import shlex
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import librosa
 import soundfile as sf
 from tqdm import tqdm
+from argparse import ArgumentParser
 
 parser = ArgumentParser(add_help=True)
-parser.add_argument('--nisp_repo_path', type=str, default='/home/shangeth/NISP/dataset/NISP-Dataset-master')
-parser = pl.Trainer.add_argparse_args(parser)
+parser.add_argument('--nisp_repo_path', type=str, default='/datasets/NISP-Dataset')
 hparams = parser.parse_args()
 
 ####################################
 # 1. Extract tar files 
 
 data_path = hparams.nisp_repo_path
-lang_dirs = [x for x in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, x))]
+lang_dirs = [x for x in os.listdir(data_path) if (os.path.isdir(os.path.join(data_path, x)) and 'master' in x)]
 
 final_tar_path = os.path.join(data_path, 'final_tars')
 if not os.path.exists(final_tar_path): os.mkdir(final_tar_path)
@@ -26,14 +24,15 @@ if not os.path.exists(final_tar_path): os.mkdir(final_tar_path)
 tmp_tar_file = os.path.join(final_tar_path, 'tmp_tar_file.tar.gz')
 tmp_tar_file2 = os.path.join(final_tar_path, 'tmp_tar_file.tar')
 
-
 for lang_fol in lang_dirs:
     sub_lang_dirs = os.listdir(os.path.join(data_path, lang_fol))
-    sub_lang_dirs.remove('scripts')
     
     for sub_lang_fol in sub_lang_dirs:
+        if sub_lang_fol == 'scripts':
+            continue
         tmp_path = os.path.join(data_path, lang_fol, sub_lang_fol)
         os.chdir(tmp_path)
+
         cmd1 = "cat *.tar.gz.* > {}".format(tmp_tar_file)
         out = subprocess.run(cmd1, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         print(out)
@@ -74,7 +73,7 @@ train_df = pd.read_csv(os.path.join(data_files_dir, 'train_spkrID'), header=None
 test_df = pd.read_csv(os.path.join(data_files_dir, 'test_spkrID'), header=None).applymap(lambda x:x[:8])
 
 train_speakers_list = train_df[0].to_list()
-train_height_list = train_df[3].to_list()
+train_height_list = speakers_df[speakers_df['Speaker_ID'].isin(train_speakers_list)]['Height'].to_list()
 test_speakers_list = test_df[0].to_list()
 
 train_speakers_list, val_speakers_list, _, _ = train_test_split(train_speakers_list, train_height_list, test_size=0.2)

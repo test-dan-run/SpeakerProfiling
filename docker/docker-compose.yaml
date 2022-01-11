@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+
+  train:
+    stdin_open: true
+    tty: true
+    image: height_clf:v0.0.1
+    runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: 0
+    volumes:
+      - /home/daniel/projects/SpeakerProfiling:/clf
+      - /home/daniel/datasets/processed:/datasets:z
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    shm_size: 16gb
+    command: python3 local_train.py
+
+  tensorboard:
+    stdin_open: true
+    tty: true
+    image: height_clf:v0.0.1
+    ports:
+      - 6006:6006
+    volumes:
+      - /home/daniel/projects/height_classifier_DSTA/logs:/logs
+    command: tensorboard --logdir /logs --host 0.0.0.0 --port 6006

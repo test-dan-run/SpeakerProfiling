@@ -3,13 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 import pytorch_lightning as pl
-from pytorch_lightning.metrics.regression import MeanAbsoluteError as MAE
-from pytorch_lightning.metrics.regression import MeanSquaredError  as MSE
-from pytorch_lightning.metrics.classification import Accuracy
+from torchmetrics.regression import MeanAbsoluteError as MAE
+from torchmetrics.regression import MeanSquaredError  as MSE
+from torchmetrics.classification import Accuracy
 
 from Model.models import Wav2VecLSTM
 import pandas as pd
-import wavencoder
 
 class RMSELoss(nn.Module):
     def __init__(self):
@@ -20,11 +19,11 @@ class RMSELoss(nn.Module):
         return torch.sqrt(self.mse(yhat,y))
 
 class LightningModel(pl.LightningModule):
-    def __init__(self, HPARAMS):
+    def __init__(self, hidden_size, alpha=1, beta=1, gamma=1, lr=1e-3, csv_path=None):
         super().__init__()
         # HPARAMS
         self.save_hyperparameters()
-        self.model = Wav2VecLSTM(HPARAMS['model_hidden_size'])
+        self.model = Wav2VecLSTM(hidden_size)
 
         self.classification_criterion = MSE()
         self.regression_criterion = MSE()
@@ -32,13 +31,13 @@ class LightningModel(pl.LightningModule):
         self.rmse_criterion = RMSELoss()
         self.accuracy = Accuracy()
 
-        self.alpha = HPARAMS['model_alpha']
-        self.beta = HPARAMS['model_beta']
-        self.gamma = HPARAMS['model_gamma']
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
 
-        self.lr = HPARAMS['training_lr']
+        self.lr = lr
 
-        self.csv_path = HPARAMS['speaker_csv_path']
+        self.csv_path = csv_path
         self.df = pd.read_csv(self.csv_path, sep=' ')
         self.h_mean = self.df['Height'].mean()
         self.h_std = self.df['Height'].std()

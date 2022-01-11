@@ -54,34 +54,43 @@ class TIMITConfig(object):
 
 class NISPConfig(object):
     # path to the unzuipped TIMIT data folder
-    data_path = '/home/n1900235d/SpeakerProfiling/TimitDataset/wav_data'
+    data_path = '/datasets/NISP-Dataset/final_data_16k'
 
     # path to csv file containing age, heights of timit speakers
-    speaker_csv_path = '/home/shangeth/NISP/dataset/NISP-Dataset-master/total_spkrinfo.list'
+    speaker_csv_path = '/datasets/NISP-Dataset/total_spkrinfo.list'
 
     # length of wav files for training and testing
-    timit_wav_len = 16000 * 5
+    wav_len = 16000 * 5
 
     batch_size = 128
     epochs = 100
-    
+
+    # augmentation
+    wav_augmentation = 'Random Crop, Additive Noise'
+    label_scale = 'Standardization'
+
+    # optimizer
+    optimizer = 'Adam'
+    lr = 1e-3
+    lr_scheduler = '-'
+
     # loss = alpha * height_loss + beta * age_loss + gamma * gender_loss
     alpha = 1
     beta = 1
     gamma = 1
 
+    # model architecture
+    architecture = 'wav2vec + soft-attention'
+
     # hidden dimension of LSTM and Dense Layers
     hidden_size = 128
 
     # No of GPUs for training and no of workers for datalaoders
-    gpu = '-1'
+    gpu = 1
     n_workers = 4
 
     # model checkpoint to continue from
     model_checkpoint = None
 
     # noise dataset for augmentation
-    noise_dataset_path = '/home/n1900235d/INTERSPEECH/NoiseDataset'
-
-    # LR of optimizer
-    lr = 1e-3
+    noise_dataset_path = '/datasets/wham_noise/tr'
