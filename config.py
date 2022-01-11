@@ -98,7 +98,6 @@ class NISPConfig(object):
 class ClearMLNISPConfig(object):
     
     # clearml dataset IDs
-    data_id = ''
     dataset_project = 'datasets/NISP'
 
     # augmentation
