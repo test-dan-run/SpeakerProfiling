@@ -1,8 +1,8 @@
 from clearml import Task, StorageManager, Dataset
 
-task = Task.init(project_name='NISP', task_name='height_classifier', output_uri='s3://experiment-logging/storage')
+task = Task.init(project_name='NISP', task_name='height_classifier-unaugmented', output_uri='s3://experiment-logging/storage')
 task.set_base_docker('dleongsh/pytorch-1.7.1-audio:public')
-task.execute_remotely(queue_name='compute', clone=False, exit_process=True)
+task.execute_remotely(queue_name='compute2', clone=False, exit_process=True)
 
 import os
 
@@ -22,11 +22,12 @@ if __name__ == "__main__":
     cfg = ClearMLNISPConfig()
 
     print('Retrieving data from S3')
-    dataset = Dataset.get(dataset_project=cfg.dataset_project)
+    dataset = Dataset.get(dataset_project=cfg.dataset_project, dataset_name='processed')
     dataset_path = dataset.get_local_copy()
+    os.listdir(dataset_path)
 
-    noise_dataset = Dataset.get(dataset_project=cfg.noise_dataset_project)
-    noise_dataset_path = noise_dataset.get_local_copy()
+    # noise_dataset = Dataset.get(dataset_project=cfg.noise_dataset_project)
+    # noise_dataset_path = noise_dataset.get_local_copy()
 
     print(f'Training Model on NISP Dataset\n#Cores = {cfg.n_workers}\t#GPU = {cfg.gpu}')
 
@@ -34,9 +35,9 @@ if __name__ == "__main__":
     ## Training Dataset
     train_set = NISPDataset(
         wav_folder = os.path.join(dataset_path, 'TRAIN'),
-        csv_file = os.path.join(dataset_path, 'total_spkinfo.list'),
+        csv_file = os.path.join(dataset_path, 'total_spkrinfo.list'),
         wav_len = cfg.wav_len,
-        noise_dataset_path = noise_dataset_path
+        # noise_dataset_path = noise_dataset_path
     )
     ## Training DataLoader
     trainloader = data.DataLoader(
@@ -49,9 +50,9 @@ if __name__ == "__main__":
     ## Validation Dataset
     valid_set = NISPDataset(
         wav_folder = os.path.join(dataset_path, 'VAL'),
-        csv_file = os.path.join(dataset_path, 'total_spkinfo.list'),
+        csv_file = os.path.join(dataset_path, 'total_spkrinfo.list'),
         wav_len = cfg.wav_len,
-        noise_dataset_path = noise_dataset_path,
+        # noise_dataset_path = noise_dataset_path,
         is_train=False
     )
     ## Validation Dataloader
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     ## Testing Dataset
     test_set = NISPDataset(
         wav_folder = os.path.join(dataset_path, 'TEST'),
-        csv_file = os.path.join(dataset_path, 'total_spkinfo.list'),
+        csv_file = os.path.join(dataset_path, 'total_spkrinfo.list'),
         wav_len = cfg.wav_len,
     )
     ## Testing DataLoader
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     #Training the Model
     logger = TensorBoardLogger('NISP_logs', name='')
 
-    model = LightningModel(cfg.hidden_size, cfg.alpha, cfg.beta, cfg.gamma, cfg.lr, cfg.speaker_csv_path)
+    model = LightningModel(cfg.hidden_size, cfg.alpha, cfg.beta, cfg.gamma, cfg.lr, os.path.join(dataset_path, 'total_spkrinfo.list'))
 
     checkpoint_callback = ModelCheckpoint(
         monitor='v_loss', 
