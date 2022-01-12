@@ -142,7 +142,7 @@ class TestNISPConfig(object):
     # audio recording configs
     channels = 1
     sample_rate = 16000
-    record_seconds = 7
+    record_seconds = 10
     wav_output_filename = 'out1.wav'
 
     # model configs

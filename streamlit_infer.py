@@ -51,6 +51,7 @@ if __name__ == '__main__':
 
     record_button = st.button(
         'Record', on_click=record, args=(cfg.record_seconds, cfg.sample_rate, cfg.channels, cfg.wav_output_filename))
+    st.write('After clicking record, please say anthing you want for 10 seconds.')
 
     if (not record_button and os.path.isfile(cfg.wav_output_filename)) or record_button:
         show_audio_widget(cfg.wav_output_filename)
