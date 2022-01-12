@@ -95,15 +95,15 @@ if __name__ == "__main__":
     trainer = pl.Trainer(fast_dev_run=False, 
                         gpus=cfg.gpu, 
                         max_epochs=cfg.epochs, 
-                        checkpoint_callback=checkpoint_callback,
                         callbacks=[
-                            EarlyStopping(
-                                monitor='v_loss',
-                                min_delta=0.00,
-                                patience=10,
-                                verbose=True,
-                                mode='min'
-                                )
+                            checkpoint_callback,
+                            # EarlyStopping(
+                            #     monitor='v_loss',
+                            #     min_delta=0.00,
+                            #     patience=10,
+                            #     verbose=True,
+                            #     mode='min'
+                            #     )
                         ],
                         logger=logger,
                         resume_from_checkpoint=cfg.model_checkpoint,
