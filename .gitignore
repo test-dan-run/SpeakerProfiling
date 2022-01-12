@@ -2,3 +2,5 @@ anaconda3-2020_pytorch.pbs
 __pycache__
 *_logs
 *.pt
+*.wav
+*.ckpt

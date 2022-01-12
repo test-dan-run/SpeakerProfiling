@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from multiprocessing import Pool
 import os
 
 from NISP.dataset import NISPDataset
@@ -8,8 +7,6 @@ from NISP.lightning_model import LightningModel
 import pytorch_lightning as pl
 
 from config import NISPConfig
-
-import torch
 import torch.utils.data as data
 
 

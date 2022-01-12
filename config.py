@@ -134,3 +134,18 @@ class ClearMLNISPConfig(object):
 
     # model checkpoint to continue from
     model_checkpoint = None
+
+class TestNISPConfig(object):
+
+    # audio recording configs
+    channels = 1
+    sample_rate = 16000
+    record_seconds = 7
+    wav_output_filename = 'out1.wav'
+
+    # model configs
+    slice_seconds = 5
+    slice_window = 1
+    
+    model_checkpoint = 'epoch=8.ckpt'
+    csv_path = '/home/daniel/datasets/processed/NISP-Dataset/final_data_16k/total_spkrinfo.list'
