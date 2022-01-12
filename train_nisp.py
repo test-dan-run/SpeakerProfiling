@@ -53,7 +53,8 @@ if __name__ == "__main__":
         wav_folder = os.path.join(cfg.data_path, 'TEST'),
         csv_file = cfg.speaker_csv_path,
         wav_len = cfg.speaker_csv_path,
-        noise_dataset_path = cfg.noise_dataset_path
+        noise_dataset_path = cfg.noise_dataset_path,
+        is_train=False
     )
     ## Testing DataLoader
     testloader = data.DataLoader(

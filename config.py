@@ -99,17 +99,19 @@ class ClearMLNISPConfig(object):
     
     # clearml dataset IDs
     dataset_project = 'datasets/NISP'
+    dataset_name = 'processed'
 
     # augmentation
     wav_augmentation = 'Random Crop, Additive Noise'
     label_scale = 'Standardization'
 
     noise_dataset_project = 'datasets/wham_noise'
+    noise_dataset_name = 'wham_train'
 
     # length of wav files for training and testing
     wav_len = 16000 * 5
 
-    batch_size = 128
+    batch_size = 8
     epochs = 100
 
     # optimizer
