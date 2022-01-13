@@ -58,4 +58,4 @@ iface = gr.Interface(
   inputs='mic',
   outputs='text',
   description='Predicts your height, age, gender based on your voice. \n Ideally, a clip of more than 5 seconds would be preferred. Any less, and your clip will be zero-padded to 5 seconds.'
-).launch(share=True)
+).launch(share=False)

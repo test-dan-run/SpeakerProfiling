@@ -4,17 +4,22 @@ This Repository contains the code for estimating the Age, Height and Gender of a
 
 ![model architeture](assets/wav2vecframework.PNG)
 
-[DEMO Colab Notebook](https://colab.research.google.com/drive/1WDBtlhg87BiPlg-IrIiFxyY5eaOVqkob?usp=sharing)
+## Inference Usage
 
-## Installation
-
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the required packages for preparing the dataset, training and testing the model.
-
+Set up the required environment with the following steps:
 ```bash
-pip install -r requirements.txt
+python3 -m venv profiling
+source profiling/bin/activate
+pip install --no-cache-dir -r docker/requirements.txt
+
 ```
 
-## Usage
+Download the NISP-trained weights [here](https://app.box.com/s/pp1ah1c0sshdeflupj7jj4ujz33hafjb), and save it in the `NISP` folder.
+
+Start up the Gradio server by running this command:
+```bash
+python3 gradio_infer.py
+```
 
 ### Download the dataset
 ```bash
