@@ -149,5 +149,5 @@ class TestNISPConfig(object):
     slice_seconds = 5
     slice_window = 1
     
-    model_checkpoint = 'epoch=8.ckpt'
-    csv_path = '/home/daniel/datasets/processed/NISP-Dataset/final_data_16k/total_spkrinfo.list'
+    model_checkpoint = './NISP/hclf-best.ckpt'
+    csv_path = './NISP/total_spkrinfo.list'

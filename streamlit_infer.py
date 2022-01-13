@@ -1,4 +1,6 @@
 import os
+import subprocess
+
 import torch
 import torchaudio
 import sounddevice as sd
@@ -6,7 +8,7 @@ import streamlit as st
 import soundfile as sf
 from NISP.lightning_model import LightningModel
 from config import TestNISPConfig as cfg
- 
+
 def record(length, sample_rate, channels, output_path):
 
     stream = sd.rec(int(length * sample_rate), samplerate=sample_rate, channels=channels)
@@ -49,18 +51,26 @@ if __name__ == '__main__':
 
     st.title('Height Recogniser v0.0.1')
 
-    record_button = st.button(
-        'Record', on_click=record, args=(cfg.record_seconds, cfg.sample_rate, cfg.channels, cfg.wav_output_filename))
-    st.write('After clicking record, please say anthing you want for 10 seconds.')
+    if not os.path.isfile(cfg.model_checkpoint):
+        st.write('Model path does not exist. Please check if the path is correct.')
+    else:
 
-    if (not record_button and os.path.isfile(cfg.wav_output_filename)) or record_button:
-        show_audio_widget(cfg.wav_output_filename)
+        duration = st.slider('Set your recording duration in seconds. (longer -> more accurate)', 5, 20, cfg.record_seconds)
 
-    predict_button = st.button(
-        'Predict', on_click=predict, args=(cfg.wav_output_filename, cfg.model_checkpoint, cfg.csv_path, cfg.slice_seconds, cfg.slice_window, cfg.sample_rate))
-    
-    if predict_button:
-        with open('output.txt', 'r') as f:
-            lines = f.readlines()
-            txt = lines[0]
-        st.write('Your predicted height is {}'.format(txt))
+        record_button = st.button(
+            'Record', on_click=record, args=(duration, cfg.sample_rate, cfg.channels, cfg.wav_output_filename))
+        st.write('After clicking record, please say anthing you want for {} seconds.'.format(duration))
+
+        if (not record_button and os.path.isfile(cfg.wav_output_filename)) or record_button:
+            st.write('Validate your recorded clip here.')
+            show_audio_widget(cfg.wav_output_filename)
+
+        st.write('First Predict run might take awhile, as it will be downloading the pretrained Wav2Vec weights.')
+        predict_button = st.button(
+            'Predict', on_click=predict, args=(cfg.wav_output_filename, cfg.model_checkpoint, cfg.csv_path, cfg.slice_seconds, cfg.slice_window, cfg.sample_rate))
+        
+        if predict_button:
+            with open('output.txt', 'r') as f:
+                lines = f.readlines()
+                txt = lines[0]
+            st.write('Your predicted height is {}'.format(txt))
