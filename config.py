@@ -71,13 +71,13 @@ class NISPConfig(object):
 
     # optimizer
     optimizer = 'Adam'
-    lr = 1e-3
+    lr = 1e-4
     lr_scheduler = '-'
 
     # loss = alpha * height_loss + beta * age_loss + gamma * gender_loss
     alpha = 1
-    beta = 1
-    gamma = 1
+    beta = 0
+    gamma = 0
 
     # model architecture
     architecture = 'wav2vec + soft-attention'
