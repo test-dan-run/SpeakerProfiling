@@ -6,11 +6,16 @@ import torch
 from NISP.lightning_model import LightningModel
 from config import TestNISPConfig as cfg
 
+INFERENCE_COUNT = 0
+
 # load model checkpoint
 model = LightningModel.load_from_checkpoint(cfg.model_checkpoint, csv_path=cfg.csv_path)
 model.eval()
 
 def predict_height(audio):
+
+    global INFERENCE_COUNT
+    INFERENCE_COUNT += 1
 
     # resample audio to required format (16kHz Sample Rate, Mono)
     input_sr, arr = audio
@@ -32,18 +37,25 @@ def predict_height(audio):
         slices = tensor.unfold(1, sample_length, win_length).transpose(0,1)
 
     # predict
-    predictions = []
+    h_preds, a_preds, g_preds = [], [], []
     with torch.no_grad():
         for slice in slices:
-            h_pred, _, _ = model(slice)
-            predictions.append((h_pred.view(-1) * model.h_std + model.h_mean).item())
+            h_pred, a_pred, g_pred = model(slice)
+            h_preds.append((h_pred.view(-1) * model.h_std + model.h_mean).item())
+            a_preds.append((a_pred.view(-1) * model.a_std + model.a_mean).item())
+            g_preds.append(g_pred.view(-1).item())
+    
+    height = round(sum(h_preds)/len(h_preds),2)
+    age = int(sum(a_preds)/len(a_preds))
+    gender = 'Female' if sum(g_preds)/len(g_preds) > 0.5 else 'Male'
 
-    mean = sum(predictions)/len(predictions)
+    print('Inference was run. Current inference count:', INFERENCE_COUNT)
 
-    return 'Your height is {}!'.format(round(mean, 2))
+    return 'You\'re {}, your height is {}, and you are {} years old.'.format(gender, height, age)
 
 iface = gr.Interface(
   fn=predict_height,
   inputs='mic',
-  outputs='text'
-).launch()
+  outputs='text',
+  description='Predicts your height, age, gender based on your voice. \n Ideally, a clip of more than 5 seconds would be preferred. Any less, and your clip will be zero-padded to 5 seconds.'
+).launch(share=True)
