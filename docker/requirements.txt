@@ -8,10 +8,8 @@ librosa
 pandas
 scikit-learn
 
-# inference/streamlit needs
-streamlit
-sounddevice
-SoundFile
+# UI-based inference
+gradio
 
 # cloud use
 clearml==1.1.5
